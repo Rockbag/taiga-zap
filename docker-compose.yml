@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  taiga:
+    image: dockertaiga/back
+    depends_on:
+      - db
+    env_file:
+      - docker-vars.env
+  taiga-zap:
+    build: .
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/app/
+  db:
+    image: postgres:11-alpine
+    ports:
+      - "5432:5432"
+    env_file:
+      - docker-vars.env

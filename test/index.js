@@ -1,21 +1,39 @@
-/* globals describe, it */
-
 require('should');
 
-// Uncomment and use this to make test calls into your app:
+const zapier = require('zapier-platform-core');
+const App = require('../index');
+const appTester = zapier.createAppTester(App);
 
-// const zapier = require('zapier-platform-core');
-// const App = require('../index');
-// const appTester = zapier.createAppTester(App);
+describe('session auth app', () => {
+    it('has an exchange for username/password', (done) => {
+      const bundle = {
+        authData: {
+          username: 'admin',
+          password: '123123'
+        }
+      };
+  
+      appTester(App.authentication.sessionConfig.perform, bundle)
+        .then((newAuthData) => {
+          should(newAuthData.sessionKey).not.eql(null);
+          done();
+        })
+        .catch(done);
+    });
 
-describe('My App', () => {
-  it('should test something', done => {
-    const x = 1;
-    x.should.eql(1);
+    it('has returns null for invalid login', (done) => {
+        const bundle = {
+            authData: {
+              username: 'non-existent-user',
+              password: 'some-password'
+            }
+          };
 
-    // const bundle = { inputData: {} };
-    // const results = appTester(App.triggers.SOME_TRIGGER.operation.perform, bundle);
-    // results.length.should.eql(3);
-    done();
-  });
+          appTester(App.authentication.sessionConfig.perform, bundle)
+          .then((newAuthData) => {
+            should(newAuthData.sessionKey).eql(null);
+            done();
+          })
+          .catch(done);
+    });
 });
