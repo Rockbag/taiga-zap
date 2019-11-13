@@ -2,7 +2,25 @@ version: 2
 jobs:
   build:
     docker:
-    - image: node:8.10.0
+      - image: node:8.10.0
+        environment:
+          TAIGA_URL: http://localhost:8000
+      - image: postgres:11-alpine
+        environment:
+          POSTGRES_HOST: localhost
+          POSTGRES_DB: taiga
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+      - image: dockertaiga/back
+        environment:
+          POSTGRES_HOST: localhost
+          POSTGRES_DB: taiga
+          TAIGA_SCHEME: http
+          TAIGA_BACK_HOST: back
+          TAIGA_FRONT_HOST: front
+          EVENTS_HOST: events
+          TAIGA_SECRET: secret
+          ENABLE_SSL: false
 
     working_directory: ~/repo
 
@@ -10,12 +28,17 @@ jobs:
     - checkout
 
     - run:
+        name: install dockerize
+        command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+        environment:
+          DOCKERIZE_VERSION: v0.3.0
+    
+    - run:
         command: |
           npm install -g zapier-platform-cli
           npm install
+          dockerize -wait tcp://localhost:8000 -timeout 3m
           zapier test
-
-
 
 workflows:
   version: 2
