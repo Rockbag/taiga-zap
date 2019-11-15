@@ -1,4 +1,6 @@
 const authentication = require('./authentication')
+const taigaTrigger = require('./triggers/taiga')
+const taigaIssues = require('./creates/issue')
 
 const includeSessionKeyHeader = (request, z, bundle) => {
   const sessionKey = bundle.sessionKey || bundle.authData.sessionKey;
@@ -21,9 +23,13 @@ const App = {
   beforeRequest: [includeSessionKeyHeader],
   afterResponse: [],
   resources: {},
-  triggers: {},
-  searches: {},
-  creates: {}
+  triggers: {
+    [taigaTrigger.key]: taigaTrigger
+  },
+  searches: { },
+  creates: {
+    [taigaIssues.key]: taigaIssues
+  }
 };
 
 module.exports = App;
